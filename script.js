@@ -1,5 +1,10 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const moves = document.getElementById("moves");
+
+function updateMoves(str) {
+  moves.innerHTML = "<h3>Moves: " + str + "</h3>"
+}
 
 const WIDTH = 600;
 const HEIGHT = 400;
@@ -69,6 +74,10 @@ function Spindle(id) {
       return -1;
     }
   }
+
+  this.count = function() {
+    return this.stack.length;
+  }
 }
 
 const hanoi = {
@@ -77,6 +86,7 @@ const hanoi = {
               new Spindle(3)],
 
   free: 0,
+  moves: 0,
 
   draw: function() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
@@ -104,8 +114,6 @@ const hanoi = {
     if(this.free == 0) {
       let disc = this.spindles[spindle].remove();
       this.free = disc;
-      // alert(this.spindles[0].stack);
-      // window.requestAnimationFrame(this.draw);
       this.draw();
     }
   },
@@ -120,7 +128,16 @@ const hanoi = {
       this.free = 0;
     }
     
+    this.moves++;
+    updateMoves(this.moves);
+
     this.draw();
+
+    // create a message and add the printing to the draw function
+    if (this.spindles[2].count() == 2) {
+      ctx.font = "30px Arial black";
+      ctx.fillText("Yay!", 10, 50);
+    }
   },
 
   hasDiscs: function(spindle) {
@@ -154,22 +171,15 @@ function click(e) {
       tower = 2;
     }
 
-    
-    let discs = hanoi.getCount(tower)
-    if (hanoi.free == 0 ) {
+
+    if (hanoi.free == 0 && hanoi.hasDiscs(tower)) {
       hanoi.remove(tower);
-    } else {
-      if (hanoi.free > hanoi.spindles[tower].top()) {
-        hanoi.add(tower);
-      }
-      
+    } else if (hanoi.free > 0 && hanoi.free > hanoi.spindles[tower].top()){
+      hanoi.add(tower);
     }
+  
     
   }
-
-  
-  
-  
 }
 
 
