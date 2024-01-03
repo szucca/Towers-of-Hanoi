@@ -1,9 +1,11 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const moves = document.getElementById("moves");
+const output = document.getElementById("output_area");
 
-function updateMoves(str) {
-  moves.innerHTML = "<h3>Moves: " + str + "</h3>"
+function updateMoves(str, source, dest) {
+  moves.innerHTML = "<h3>Moves: " + str + "</h3>";
+  output.value += (source + 1) + " to " + (dest + 1) + "\n";
 }
 
 const WIDTH = 600;
@@ -60,6 +62,10 @@ function Spindle(id) {
   this.remove = function() {
     return this.stack.pop();
   };
+
+  this.clear = function() {
+    this.stack = [];
+  };
   
   this.draw = function() {
     for(let i = 0; i < this.stack.length; i++) {
@@ -87,6 +93,7 @@ const hanoi = {
 
   free: 0,
   moves: 0,
+  source: -1,
 
   draw: function() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
@@ -105,6 +112,10 @@ const hanoi = {
   },
 
   init: function() {
+    this.spindles[0].clear();
+    this.spindles[1].clear();
+    this.spindles[2].clear();
+
     for(let i = 1; i <= 6; i++){
       this.spindles[0].add(i);
     } 
@@ -114,6 +125,7 @@ const hanoi = {
     if(this.free == 0) {
       let disc = this.spindles[spindle].remove();
       this.free = disc;
+      this.source = spindle;
       this.draw();
     }
   },
@@ -123,18 +135,23 @@ const hanoi = {
   },
   
   add: function(spindle) {
-    if (this.free > 0) {
-      this.spindles[spindle].add(this.free);
-      this.free = 0;
-    }
+
+    this.spindles[spindle].add(this.free);
+    this.free = 0;
     
-    this.moves++;
-    updateMoves(this.moves);
+    
+    // Free move if you are just putting it back
+    if (this.source != spindle) {
+      this.moves++;
+      updateMoves(this.moves, this.source, spindle);
+    }
+
+    this.source = -1;
 
     this.draw();
 
     // create a message and add the printing to the draw function
-    if (this.spindles[2].count() == 2) {
+    if (this.spindles[1].count() == 6 || this.spindles[2].count() == 6) {
       ctx.font = "30px Arial black";
       ctx.fillText("Yay!", 10, 50);
     }
@@ -146,6 +163,35 @@ const hanoi = {
   
 }
 
+var step = 0;
+var i_list = [];
+
+function go() {
+  // re-initialize the tower
+  hanoi.init();
+  
+   // read the instructions
+  let instructions = document.getElementById("instructions").value;
+  i_list = instructions.split("\n");
+  setTimeout(takeDisc, 500);
+}
+
+function takeDisc() {
+  
+  let source = parseInt(i_list[step].substring(0, 1)) - 1;
+  hanoi.remove(source);
+  setTimeout(putDisc, 500);
+  
+}
+
+function putDisc() {
+  let dest = parseInt(i_list[step].substring(5, 6)) - 1;
+  hanoi.add(dest);
+  step++;
+  if (step < i_list.length) {
+    setTimeout(takeDisc, 500);
+  }
+}
 
 let xpos = 10;
 function animate() {
@@ -181,7 +227,6 @@ function click(e) {
     
   }
 }
-
 
 canvas.onclick = click;
   

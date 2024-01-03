@@ -24,15 +24,23 @@
   </select>
 
   <h3>Instructions</h3>
-  <textarea id="instructions" rows="24"></textarea>
+  <textarea id="instructions" rows="24">0 to 1
+0 to 2
+1 to 2
+0 to 1
+  </textarea>
 
-    <button id="go"> Go </button>
+    <button id="go" onclick="go()"> Go </button>
   </div>
 
   <canvas id="canvas" width="600" height="400"></canvas>
 
   <div id="moves">
     <h2>Moves: 0</h2>
+  </div>
+
+  <div id="output">
+    <textarea id="output_area" cols="20" rows="24"></textarea>
   </div>
   
 
